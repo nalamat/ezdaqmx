@@ -1,17 +1,12 @@
 '''Some utility stuff!
 
 
-This file is part of the EARS project <https://github.com/nalamat/ears>
+This file is part of ezDAQmx <https://github.com/nalamat/ezdaqmx>
 Copyright (C) 2017-2021 Nima Alamatsaz <nima.alamatsaz@gmail.com>
 '''
 
-import os
-import queue
 import logging
-import pathlib
-import functools
 import threading
-import subprocess
 import collections
 import numpy       as     np
 
@@ -19,95 +14,12 @@ import numpy       as     np
 log = logging.getLogger(__name__)
 
 
-# def logExceptions(message=''):
-#     '''Function decorator to log exceptions.'''
-#
-#     def wrapper(func):
-#
-#         @functools.wraps(func)
-#         def wrapper(*args, **kwargs):
-#             try:
-#                 func(*args, **kwargs)
-#             except:
-#                 log.exception(message)
-#
-#         return wrapper
-#
-#     return wrapper
-
-
-# def inDirectory(file, directory):
-#     file      = pathlib.Path(file     ).resolve()
-#     directory = pathlib.Path(directory).resolve()
-#
-#     if file.exists() and file.samefile(directory):
-#         return True
-#
-#     for parent in file.parents:
-#         if parent.exists() and parent.samefile(directory):
-#             return True
-#
-#     return False
-
 def listLike(obj, strIncluded=True):
     return (hasattr(obj, '__len__') and
         (strIncluded or not isinstance(obj, str)) )
 
 def iterable(obj):
     return isinstance(obj, collections.Iterable)
-
-def inDirectory(file, directory):
-    file      = os.path.normcase(os.path.realpath(file     ))
-    directory = os.path.normcase(os.path.realpath(directory))
-
-    return os.path.commonpath([file, directory]) == directory
-
-def relativePath(file, directory=None):
-    if not file:
-        return file
-
-    if not directory:
-        directory = os.getcwd()
-
-    if inDirectory(file, directory):
-        return os.path.relpath(file, directory).replace('\\', '/')
-    else:
-        return file.replace('\\', '/')
-
-def absolutePath(file, directory=None):
-    if not directory:
-        directory = os.getcwd()
-
-    if os.path.isabs(file):
-        return file.replace('\\', '/')
-    else:
-        return os.path.realpath(
-            os.path.join(directory, file)).replace('\\', '/')
-
-def getCommitHash():
-    '''Return the current commit hash (HEAD)'''
-    try:
-        proc = subprocess.run(['git', 'log', '-1', '--pretty="%H"'],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return proc.stdout.decode().strip(' \t\r\n"')
-    except:
-        return ''
-
-class Queue(queue.Queue):
-    def clear(self):
-        while not self.empty():
-            self.get()
-
-
-class Dict(dict):
-    '''Extended dictionary supporting attribute-like access to values using the
-    `.` notation. The keys for `.` access should be legible python name strings.
-    '''
-    def __getattr__(self, name):
-        return self[name]
-
-    def __setattr__(self, name, value):
-        self[name] = value
 
 
 class CircularBuffer():
@@ -376,22 +288,3 @@ class Event():
             # ignore callback return values, even if there is only one callback
             for callback in self._callbacks:
                 callback(*args, **kwargs)
-
-
-if __name__=='__main__':
-    # stream = CircularBuffer((2,10))
-    # print(stream)
-    # stream.write(np.array([np.arange(0,5), np.arange(100,105)]))
-    # print(stream)
-    # stream.write(np.array([np.arange(5,15), np.arange(105,115)]))
-    # print(stream)
-    # print(stream.read(np.arange(7,14)))
-    # print(len(stream))
-
-    # @logExceptions()
-    # def func():
-    #     raise ValueError()
-    #
-    # func()
-
-    print(getCommitHash())
