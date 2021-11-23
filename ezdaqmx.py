@@ -54,8 +54,9 @@ import threading
 import numpy     as np
 import datetime  as dt
 
+import pype
+
 import misc
-import pypeline
 
 
 SIM = '--sim' in sys.argv
@@ -201,7 +202,7 @@ class BaseTask():
             self._clear()
 
 
-class DigitalInput(BaseTask, pypeline.Node):
+class DigitalInput(BaseTask, pype.Node):
     @property
     def lineNames(self):
         return self._lineNames
@@ -248,7 +249,7 @@ class DigitalInput(BaseTask, pypeline.Node):
 
         super()._postInit()
 
-        pypeline.Node.__init__(self)
+        pype.Node.__init__(self)
 
         if lineNames:
             if len(lineNames) != self.lineCount:
@@ -559,7 +560,7 @@ class BaseAnalog(BaseTask):
         # self.WaitUntilTaskDone(mx.DAQmx_Val_WaitInfinitely)
 
 
-class AnalogInput(BaseAnalog, pypeline.Sampled):
+class AnalogInput(BaseAnalog, pype.Sampled):
     @property
     def nsRead(self):
         '''Total number of samples read.'''
@@ -686,7 +687,7 @@ class AnalogInput(BaseAnalog, pypeline.Sampled):
         self._postInit(accurateFS, timebaseSrc, timebaseRate,
             startTrigger)
 
-        pypeline.Sampled.__init__(self, fs=self._fs, channels=self._lineCount)
+        pype.Sampled.__init__(self, fs=self._fs, channels=self._lineCount)
 
         if SIM:
             self._simBuffer = misc.CircularBuffer((self.lineCount, bufSize))
@@ -765,7 +766,7 @@ class AnalogInput(BaseAnalog, pypeline.Sampled):
         if self.dataAcquired:
             self.dataAcquired(self, data)
         # pass data down into the pipeline
-        pypeline.Sampled.write(self, data)
+        pype.Sampled.write(self, data)
 
     def read(self, ns=None, wait=True):
         '''Read samples from the device.
